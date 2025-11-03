@@ -1,0 +1,74 @@
+<%-
+  cores_lookup = {
+      "any" => "64",
+      "any-gpu" => "64",
+      "64cores_zen4_higmem" => "64",
+      "64cores_zen4" => "64",
+      "48cores_cascade" => "48",
+      "44cores_cascade" => "44",
+      "44cores_skylake" => "44",
+      "a100_80gb_zen4" => "64",
+      "a100_40gb_zen3" => "64",
+      "v100_32gb_zen3" => "64",
+      "v100_32gb_skylake" => "64",
+      "v100_32gb_cascade" => "48",
+      "lowmangrp_lynx" => "32",
+      "lowmangrp_lascar" => "32",
+      "curtisgrp_crux" => "32",
+      "yanggrp_lovelace" => "64",
+      "devarakondagrp_hopper" => "128",
+  }
+
+  nodes = bc_num_slots.blank? ? 1 : bc_num_slots.to_i
+  mem = memory.blank? ? 4 : memory.to_i
+  max_cores = cores_lookup[node_type]
+  ppn = num_cores.blank? ? max_cores : num_cores.to_i
+  gpus = num_gpus.blank? ? 1: num_gpus.to_i
+
+  case node_type
+  when "any"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "cpu"                                                      ]
+  when "any-gpu"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "gpu",                     "--gpus", "#{gpus}"             ]
+  when "64cores_zen4_higmem"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "cpu&64cores&zen4&highmem"                                 ]
+  when "64cores_zen4"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "cpu&64cores&zen4"                                         ]
+  when "48cores_cascade"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "cpu&48cores&cascade"                                      ]
+  when "44cores_cascade"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "cpu&44cores&cascade"                                      ]
+  when "44cores_skylake"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "cpu&44cores&skylake"                                      ]
+  when "a100_80gb_zen4"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "gpu&a100_80&zen4",        "--gres", "gpu:A100_80:#{gpus}" ]
+  when "a100_40gb_zen3"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "gpu&a100_40&zen3",        "--gres", "gpu:A100_40:#{gpus}" ]
+  when "v100_32gb_zen3"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--constraint", "gpu&v100_32&zen3",        "--gres", "gpu:V100_32:#{gpus}" ]
+  when "lowmangrp_lynx"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--nodelist", "lynx"                                                       ]
+  when "lowmangrp_lascar"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--nodelist", "lascar"                                                     ]
+  when "curtisgrp_crux"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--nodelist", "crux"                                                       ]
+  when "yanggrp_lovelace"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--nodelist", "lovelace",                  "--gres", "gpu:L40S:#{gpus}"    ]
+  when "devarakondagrp_hopper"
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G", "--nodelist", "hopper"                                                     ]
+  else
+    slurm_args = [ "--nodes", "#{nodes}", "--ntasks-per-node", "#{ppn}", "--mem", "#{mem}G"                                                                             ]
+  end
+%>
+---
+batch_connect:
+  template: basic
+  conn_params:
+    - adminuser
+script:
+  accounting_id: "<%= accounts %>"
+  queue_name: "<%= queues %>"
+  native:
+  <%- slurm_args.each do |arg| %>
+    - "<%= arg %>"
+  <%- end %>

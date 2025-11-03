@@ -1,0 +1,14 @@
+<p>Log in to your CloudBeaver session using the credentials provided here:</p>
+
+<p>
+<strong>User name:</strong> <code><%= adminuser %></code><br>
+<strong>User password:</strong> <code><%= password %></code><br>
+</p>
+<strong>These are NOT for your database connection!</strong>
+
+<form action="/node/<%= host %>/<%= port %>" method="post" target="_blank">
+  <input type="hidden" name="password" value="<%= password %>">
+  <button class="btn btn-primary" type="submit">
+    <i class="fa fa-database"></i> Connect to CloudBeaver
+  </button>
+</form>

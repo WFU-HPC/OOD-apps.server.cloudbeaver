@@ -1,0 +1,458 @@
+<%
+extend AccountCache
+useraccounts = dynamic_accounts
+#raise(StandardError,  dynamic_accounts)
+contributors = ["lowmangrp", "curtisgrp", "yanggrp", "devarakondagrp"]
+%>
+---
+cluster:
+  - "deac"
+form:
+  - version
+#  - enable_advanced
+  - enable_extra_modules
+  - extra_modules
+  - accounts
+  - queues
+  - bc_num_hours
+  - num_cores
+  - memory
+  - bc_num_slots
+  - node_type
+  - num_gpus
+  - bc_email_on_started
+attributes:
+  auto_accounts:
+    label: "Slurm Account"
+    help: |
+      The Slurm account to be used for your job submission.
+  accounts:
+    label: "Slurm Account"
+    widget: "select"
+    options:
+      <%- useraccounts.each do |g| -%>
+      <%- if contributors.include? g.first.downcase -%>
+      - [ "<%= g.first.downcase %>", data-set-queues: "ondemand", ]
+      <%- else -%>
+      - [ "<%= g.first.downcase %>", data-set-queues: "ondemand", ]
+      <%- end -%>
+      <%- end -%>
+    help: |
+      The Slurm account to be used for your job submission.
+  auto_qos:
+    label: "Slurm QoS"
+    value: "normal"
+    help: |
+      Your Slurm QoS priority; the default is normal.
+  num_cores:
+    label: "Number of cores"
+    widget: "number_field"
+    value: 2
+    help: |
+      Number of cores requested; leave blank if requesting a full node.
+    min: 1
+    step: 1
+  num_gpus:
+    label: "Number of GPUs"
+    widget: "number_field"
+    value: 0
+    help: |
+      Number of GPUs requested, only available with **Any GPU** or on specific GPU nodes.
+    min: 0
+    step: 1
+  memory:
+    widget: "number_field"
+    label: "Memory (GB)"
+    value: 8
+    help: |
+      Amount of RAM being requested in GB.
+    min: 1
+    step: 1
+  bc_num_slots: 1
+  bc_num_hours:
+    min: 1
+    value: 1
+    step: 1
+    help: |
+      Number of hours being requested.
+  bc_queue: "ondemand"
+  auto_queues:
+    label: "Slurm Partition"
+    value: "small"
+    help: |
+        - **small** <br>
+          1 node with 64/48 cores max. for <=24 hours.
+        - **large** <br>
+          Up to 16 nodes with up to 64/48 cores each for <=4320 hours (180 days).
+        - **gpu** <br>
+          Max of 2 GPU nodes for <=672 hours (28 days).
+  queues:
+    label: "Slurm Partition"
+    widget: select
+    value: "ondemand"
+    options:
+      - [ "ondemand" ]
+      <%- useraccounts.each do |g| -%>
+      <%- if contributors.include? g.first.downcase -%>
+      - [ "<%= g.first.downcase.gsub('grp', 'Grp') %>", data-set-accounts: "<%= g.first.downcase %>", ]
+      <%- end -%>
+      <%- end -%>
+    help: |
+        - **Default: ondemand** <br>
+          1 node with 64/48 cores max. for <=48 hours.
+  node_type:
+      widget: select
+      label: "Node type"
+      help: |
+        Request a specific type of compute node (server). If you do not have
+        specific hardware requirements, just leave it on **Any**! 
+      options:
+        - [
+            "Any (SHORTEST WAIT)", "any",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 2250,
+            data-option-for-queues-small: true,
+            data-option-for-queues-large: true,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "Any GPU", "any-gpu",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 6,
+            data-min-num-gpus: 1,
+            data-max-memory: 1000,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: true,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 1,
+          ]
+        - [
+            "CPU: 64CORES_ZEN4_HIGMEM (AMD, 64 cores, 2250 GB)", "64cores_zen4_higmem",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 2250,
+            data-option-for-queues-small: true,
+            data-option-for-queues-large: true,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "CPU: 64CORES_ZEN4 (AMD, 64 cores, 750 GB)", "64cores_zen4",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 750,
+            data-option-for-queues-small: true,
+            data-option-for-queues-large: true,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "CPU: 48CORES_CASCADE (Intel, 48 cores, 180 GB)", "48cores_cascade",
+            data-max-num-cores: 48,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 180,
+            data-option-for-queues-small: true,
+            data-option-for-queues-large: true,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "CPU: 44CORES_CASCADE (Intel, 44 cores, 180 GB)", "44cores_cascade",
+            data-max-num-cores: 44,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 180,
+            data-option-for-queues-small: true,
+            data-option-for-queues-large: true,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "CPU: 44CORES_SKYLAKE (Intel, 44 cores, 180 GB)", "44cores_skylake",
+            data-max-num-cores: 44,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 180,
+            data-option-for-queues-small: true,
+            data-option-for-queues-large: true,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "GPU: A100_80GB_ZEN4 (AMD, 64 cores, 750 GB, 4x A100 80 GB)", "a100_80gb_zen4",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 4,
+            data-min-num-gpus: 1,
+            data-max-memory: 750,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: true,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 1,
+          ]
+        - [
+            "GPU: A100_40GB_ZEN3 (AMD, 64 cores, 1000 GB, 4x A100 40 GB)", "a100_40gb_zen3",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 4,
+            data-min-num-gpus: 1,
+            data-max-memory: 1000,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: true,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 1,
+          ]
+        - [
+            "GPU: V100_32GB_ZEN3 (AMD, 64 cores, 1000 GB, 4x V100 32 GB)", "v100_32gb_zen3",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 4,
+            data-min-num-gpus: 1,
+            data-max-memory: 1000,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: true,
+            data-option-for-queues-ondemand: true,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 1,
+          ]
+        - [
+            "lowmanGrp: lynx", "lowmangrp_lynx",
+            data-max-num-cores: 32,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 220,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: false,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: true,
+            data-option-for-accounts-curtisgrp: false,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: false,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: false,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "lowmanGrp: lascar", "lowmangrp_lascar",
+            data-max-num-cores: 32,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 220,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: false,
+            data-option-for-accounts-lowmangrp: true,
+            data-option-for-queues-lowmangrp: true,
+            data-option-for-accounts-curtisgrp: false,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: false,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: false,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "curtisGrp: crux", "curtisgrp_crux",
+            data-max-num-cores: 32,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 250,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: false,
+            data-option-for-accounts-lowmangrp: false,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: true,
+            data-option-for-queues-curtisgrp: true,
+            data-option-for-accounts-yanggrp: false,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: false,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+        - [
+            "yangGrp: lovelace", "yanggrp_lovelace",
+            data-max-num-cores: 64,
+            data-max-num-gpus: 4,
+            data-min-num-gpus: 0,
+            data-max-memory: 750,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: false,
+            data-option-for-accounts-lowmangrp: false,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: false,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: true,
+            data-option-for-queues-yanggrp: true,
+            data-option-for-accounts-devarakondagrp: false,
+            data-option-for-queues-devarakondagrp: false,
+            data-set-num-gpus: 0,
+          ]
+        - [
+            "devarakondaGrp: hopper", "devarakondagrp_hopper",
+            data-max-num-cores: 128,
+            data-max-num-gpus: 0,
+            data-min-num-gpus: 0,
+            data-max-memory: 250,
+            data-option-for-queues-small: false,
+            data-option-for-queues-large: false,
+            data-option-for-queues-gpu: false,
+            data-option-for-queues-ondemand: false,
+            data-option-for-accounts-lowmangrp: false,
+            data-option-for-queues-lowmangrp: false,
+            data-option-for-accounts-curtisgrp: false,
+            data-option-for-queues-curtisgrp: false,
+            data-option-for-accounts-yanggrp: false,
+            data-option-for-queues-yanggrp: false,
+            data-option-for-accounts-devarakondagrp: true,
+            data-option-for-queues-devarakondagrp: true,
+            data-set-num-gpus: 0,
+            data-hide-num-gpus: true,
+          ]
+  working_dir:
+    widget: "path_selector"
+    label: "Working Directory"
+    data-target-file-type: dirs  # Valid values are: files, dirs, or both
+    readonly: false
+    help: |
+      Select your project directory; defaults to $HOME.
+  extra_modules:
+    widget: "text_field"
+    label: "Additional environment modules"
+    value: ""
+    help: |
+      Any additional modules that you would like to load (apps, libs, CUDA, etc.). Separate by spaces, just like you would in a normal *module load* command.
+  enable_extra_modules:
+    label: "Enable Extra Environment Modules"
+    widget: 'check_box'
+    html_options:
+      data:
+        hide-extra-modules-when-un-checked: true
+  bc_email_on_started: 0
+  version:
+    widget: "select"
+    label: "CloudBeaver Version"
+    options:
+      - ["CloudBeaver 25.0.4", "apps/cloudbeaver/25.0.4"]
+  enable_advanced:
+    label: "Select Advanced Options"
+    widget: 'check_box'
+    html_options:
+      data:
+        hide-enable_extra_modules-when-un-checked: true
+        hide-accounts-when-un-checked: true
+        hide-queues-when-un-checked: true
+        hide-bc_num_hours-when-un-checked: true
+        hide-num_cores-when-un-checked: true
+        hide-memory-when-un-checked: true
+        hide-bc_num_slots-when-un-checked: true
+        hide-node_type-when-un-checked: true
+        hide-num_gpus-when-un-checked: true

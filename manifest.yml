@@ -1,0 +1,20 @@
+---
+name: CloudBeaver
+category: Interactive Apps
+subcategory: "04. Database Development"
+role: batch_connect
+description: |
+  CloudBeaver is a lightweight web application designed for efficient and secure
+  data management. It supports a wide range of databases, including SQL, NoSQL,
+  and cloud databases, all accessible through a web browser. Optimized for
+  teamwork, it simplifies database operations and allows multiple users to
+  collaborate seamlessly in a cloud-based environment.
+metadata:
+  field_of_science:
+    - "business"
+    - "computer science"
+  profile_msba: "Databases and Database Administration"
+  profile_tipsandtricks: "1. Clients"
+  profile_sta279: "Student Apps"
+tile:
+  sub_caption: ""
